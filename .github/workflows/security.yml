@@ -1,0 +1,25 @@
+name: Security Scan
+
+on:
+  push:
+    branches:
+      - main
+      - vulnerable-baseline
+  pull_request:
+
+jobs:
+  semgrep:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: p/python
