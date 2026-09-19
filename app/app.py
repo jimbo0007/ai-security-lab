@@ -7,11 +7,11 @@ app = Flask(__name__)
 # Intentionally hard-coded secret for security-scanner testing
 SECRET_KEY = "super-secret-development-key-12345"
 
-DATABASE = "users.db"
+app.config["DATABASE"] = "users.db"
 
 
 def get_db():
-    return sqlite3.connect(DATABASE)
+    return sqlite3.connect(app.config["DATABASE"])
 
 
 @app.route("/")
@@ -31,12 +31,14 @@ def index():
 def user():
     user_id = request.args.get("id")
 
+    if not user_id or not user_id.isdigit():
+        return {"error": "Invalid user ID"}, 400
+
     db = get_db()
 
-    # INTENTIONALLY VULNERABLE: SQL injection
-    query = f"SELECT username, email FROM users WHERE id = {user_id}"
+    query = "SELECT username, email FROM users WHERE id = ?"
 
-    result = db.execute(query).fetchone()
+    result = db.execute(query, (int(user_id),)).fetchone()
 
     if result:
         return {
